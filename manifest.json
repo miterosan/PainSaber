@@ -1,0 +1,14 @@
+{
+    "author": "Miterosan",
+    "description": [
+      "Delivers pain on missplay"
+    ],
+    "gameVersion": "1.34.2",
+    "id": null,
+    "name": "PainSaber",
+    "version": "0.1.0",
+    "links": {},
+    "dependsOn": {
+      "BSIPA": "^4.3.2"
+    }
+}
