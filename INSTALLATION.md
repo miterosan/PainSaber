@@ -1,7 +1,5 @@
 # Installation
 
-Currently only installing from zip is supported.
-
 ## 0. Open beatsaber
 
 Before installing BSIPA you need to open Beatsaber at least once.
@@ -64,42 +62,42 @@ Put the **names** (not ID) of the shockers you want to use into each Shockers li
 
 ```json
 {
-  "OpenShockApiKey": "LaOQcombMYuRwvcnUp8zFnPW0Z2Oowu56SIRK9L4hU02vlPESt3uv8gVgIykvIsF",
-  "Device": "e15df0d6-6d29-3151-b42a-b6255d3356a5",
-  "NoteMissed": {
-    "Shockers": [
-       "Left Leg",
-       "Right Leg"
-    ],
-    "Intensity": 50,
-    "DurationMs": 400
-  },
-  "NoteFailed": {
-    "Shockers": [
-        "Left Leg",
-	    "Right Leg",
-    ],
-    "Intensity": 70,
-    "DurationMs": 400
-  },
-  "BombCut": {
-    "Shockers": [
-	    "Right Arm",
-	    "Left Arm",
-        "Left Leg",
-	    "Right Leg",
-    ],
-    "Intensity": 80,
-    "DurationMs": 1000
-  },
-  "HeadInWall": {
-    "Shockers": [
-	    "Right Arm",
-	    "Left Arm",
-    ],
-    "StartIntensity": 50,
-    "IncrementBy": 10,
-    "IncrementEveryMs": 200
-  }
+    "OpenShockApiKey": "LaOQcombMYuRwvcnUp8zFnPW0Z2Oowu56SIRK9L4hU02vlPESt3uv8gVgIykvIsF",
+    "Device": "e15df0d6-6d29-3151-b42a-b6255d3356a5",
+    "NoteMissed": {
+        "Shockers": [
+            "Left Leg",
+            "Right Leg"
+        ],
+        "Intensity": 50,
+        "DurationMs": 400
+    },
+    "NoteFailed": {
+        "Shockers": [
+            "Left Leg",
+            "Right Leg",
+        ],
+        "Intensity": 70,
+        "DurationMs": 400
+    },
+    "BombCut": {
+        "Shockers": [
+            "Right Arm",
+            "Left Arm",
+            "Left Leg",
+            "Right Leg",
+        ],
+        "Intensity": 80,
+        "DurationMs": 1000
+    },
+    "HeadInWall": {
+        "Shockers": [
+            "Right Arm",
+            "Left Arm",
+        ],
+        "StartIntensity": 50,
+        "IncrementBy": 10,
+        "IncrementEveryMs": 200
+    }
 }
 ```

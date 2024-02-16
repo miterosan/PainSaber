@@ -1,6 +1,6 @@
 # Painsaber
 
-Get punished when missing notes.
+Get punished for missing notes.
 
 This mod adds support for Openshock/Shocklink supporting shock collars.
 
@@ -10,9 +10,11 @@ This mod adds support for Openshock/Shocklink supporting shock collars.
 
 --------------
 
-> Work in progress
+This mod is work in progress.
 
-Missing features:
+TODO:
 - Multiplayer support
-- Ingame Configuration
+- Ingame Configuration (e.g. Intensity)
 - Ingame Setup
+
+
