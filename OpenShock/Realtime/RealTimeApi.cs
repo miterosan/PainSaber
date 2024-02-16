@@ -107,7 +107,7 @@ namespace PainSaber.OpenShock
             }
         }
 
-        public async Task SendFrame(string shockerId, byte intensity, LiveControlType type) 
+        private async Task SendFrame(string shockerId, byte intensity, LiveControlType type) 
         {
             PainSaberPlugin.Log.Debug($"Sending Frame: {shockerId}, {intensity}, {type}");
 

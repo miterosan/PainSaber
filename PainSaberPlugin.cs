@@ -24,38 +24,69 @@ namespace PainSaber
 
         private static readonly List<Shocker> Shocker = new List<Shocker>();
 
+
         public static void NoteMissed() 
         {
-            var endTime = DateTime.UtcNow + TimeSpan.FromMilliseconds(500);
+            var duration = PainSaberConfig.Instance.NoteMissed.DurationMs;
+            var endTime = DateTime.UtcNow + TimeSpan.FromMilliseconds(duration);
 
-            foreach (var shocker in Shocker)
+            foreach (var name in PainSaberConfig.Instance.NoteMissed.Shockers)
             {
-                RealTimeApi.AddShockTransmission(new ConstantShockTransmission(shocker.id, endTime, 10));
+                RealTimeApi.AddShockTransmission(new ConstantShockTransmission(
+                    getShockerIdByName(name),
+                    endTime,
+                    (byte)PainSaberConfig.Instance.NoteMissed.Intensity
+                ));
             }
         }
 
         public static void NoteIncorrect()
         {
-            var endTime = DateTime.UtcNow + TimeSpan.FromMilliseconds(500);
+            var duration = PainSaberConfig.Instance.NoteFailed.DurationMs;
+            var endTime = DateTime.UtcNow + TimeSpan.FromMilliseconds(duration);
 
-            foreach (var shocker in Shocker)
+            foreach (var name in PainSaberConfig.Instance.NoteFailed.Shockers)
             {
-                RealTimeApi.AddShockTransmission(new ConstantShockTransmission(shocker.id, endTime, 10));
+                RealTimeApi.AddShockTransmission(new ConstantShockTransmission(
+                    getShockerIdByName(name),
+                    endTime,
+                    (byte)PainSaberConfig.Instance.NoteFailed.Intensity
+                ));
             }
         }
 
         public static void HeadInWall(long durationMs)
         {
-            //todo implement
+            int intensity = PainSaberConfig.Instance.HeadInWall.StartIntensity;
+            int incrementBy = PainSaberConfig.Instance.HeadInWall.IncrementBy;
+            int incrementEvery = PainSaberConfig.Instance.HeadInWall.IncrementEveryMs;
+
+            intensity += (int)(durationMs / incrementEvery) * incrementBy;
+
+            var endTime = DateTime.UtcNow + TimeSpan.FromMilliseconds(100 + incrementEvery);
+
+            foreach (var name in PainSaberConfig.Instance.HeadInWall.Shockers)
+            {
+                RealTimeApi.AddShockTransmission(new ConstantShockTransmission(
+                    getShockerIdByName(name),
+                    endTime,
+                    (byte)intensity
+                ));
+            }
         }
 
         public static void BombCut() 
         {
-            var endTime = DateTime.UtcNow + TimeSpan.FromMilliseconds(500);
+            var duration = PainSaberConfig.Instance.BombCut.DurationMs;
+            var endTime = DateTime.UtcNow + TimeSpan.FromMilliseconds(duration);
 
-            foreach (var shocker in Shocker)
+            foreach (var name in PainSaberConfig.Instance.BombCut.Shockers)
             {
-                RealTimeApi.AddShockTransmission(new ConstantShockTransmission(shocker.id, endTime, 10));
+                RealTimeApi.AddShockTransmission(new ConstantShockTransmission(
+                    getShockerIdByName(name),
+                    endTime,
+                    (byte)PainSaberConfig.Instance.BombCut.Intensity
+                ));
             }
         }
 
@@ -65,10 +96,8 @@ namespace PainSaber
             Log = logger;
             PainSaberConfig.Instance = conf.Generated<PainSaberConfig>();
 
-            string key = "";
-
-            API = new OpenShockApi(key);
-            RealTimeApi = new RealTimeApi(key);
+            API = new OpenShockApi(PainSaberConfig.Instance.OpenShockApiKey);
+            RealTimeApi = new RealTimeApi(PainSaberConfig.Instance.OpenShockApiKey);
 
             EventRegistrationBehaviour.OnLoad();
 
@@ -93,6 +122,20 @@ namespace PainSaber
         {
             new Harmony("org.miterosan.painsaber").PatchAll(Assembly.GetExecutingAssembly());
         }
+
+        [OnExit]
+        public void OnExit()
+        {
+            // teardown
+        }
+
+
+        private static string getShockerIdByName(string name) 
+        {
+            // todo make faster
+            return Shocker.Find(s => s.name.Equals(name, StringComparison.InvariantCultureIgnoreCase)).id;
+        }
+
     }
 }
 
