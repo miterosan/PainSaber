@@ -4,6 +4,10 @@ Get punished when missing notes.
 
 This mod adds support for Openshock/Shocklink supporting shock collars.
 
+
+
+[Go to Installation guide](INSTALLATION.md)
+
 --------------
 
 > Work in progress
