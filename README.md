@@ -16,6 +16,3 @@ Missing features:
 - Multiplayer support
 - Ingame Configuration
 - Ingame Setup
-
-Missing Optional features:
-- Shock based on missed note / 
