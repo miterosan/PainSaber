@@ -3,15 +3,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
+using System.Timers;
+using BeatSaberMarkupLanguage;
+using BeatSaberMarkupLanguage.Settings;
 using HarmonyLib;
 using IPA;
 using IPA.Config;
 using IPA.Config.Stores;
 using IPA.Logging;
+using ModestTree;
 using PainSaber.Hooks;
 using PainSaber.OpenShock;
 using PainSaber.OpenShock.Realtime;
 using PainSaber.OpenShock.RestModels;
+using PainSaber.Utils;
 
 namespace PainSaber
 {
@@ -21,51 +27,118 @@ namespace PainSaber
         public static Logger Log { get; private set; }
         public static OpenShockApi API { get; private set; }
         public static RealTimeApi RealTimeApi { get; private set; }
+        public static PainSaberConfig Config { get; private set; }
+        public static Device[] Devices { get; private set; } = Array.Empty<Device>();
+        public static Shocker[] Shockers => SelectedDevice?.shockers ?? Array.Empty<Shocker>();
+        public static Device SelectedDevice { get; private set; }
+        public static NotifyingProperty<PainSaberPluginStatus> Status { get; } = new NotifyingProperty<PainSaberPluginStatus>();
 
-        private static readonly List<Shocker> Shocker = new List<Shocker>();
+        private static Timer retryTimer = new Timer(5000);
 
-
-        public static void NoteMissed() 
+        private static void retryConnection()
         {
-            var duration = PainSaberConfig.Instance.NoteMissed.DurationMs;
+            // is connected? stop right here
+            if (RealTimeApi.State == RealTimeApiState.Connected) return;
+
+            AsyncUtils.FireAndForget(new Task(async () => await tryReconnect()));
+        }
+
+        private static async Task tryReconnect()
+        {
+            // validate apikey
+            API = new OpenShockApi(Config.OpenShockApiKey);
+            RealTimeApi = new RealTimeApi(Config.OpenShockApiKey);
+
+            try
+            {
+                Devices = await API.GetOwnShockers();
+            }
+            catch
+            {
+                Status.Value = PainSaberPluginStatus.InvalidApiKey;
+                return;
+            }
+
+            if (Devices.IsEmpty())
+            {
+                Status.Value = PainSaberPluginStatus.NoDevicesAvailable;
+                return;
+            }
+
+            // todo support selecting the device from ingame UI
+            SelectedDevice = Devices.FirstOrDefault();
+
+            string gateway;
+
+            Status.Value = PainSaberPluginStatus.ConnectingToDevice;
+
+            try
+            {
+                var response = await API.GetLiveControlGatewayInfo(SelectedDevice.id);
+                gateway = response.Gateway;
+            }
+            catch
+            {
+                Status.Value = PainSaberPluginStatus.NoDevicesAvailable;
+                return;
+            }
+
+            try
+            {
+                // connect to realtime api
+                await RealTimeApi.Connect(SelectedDevice.id, gateway);
+            }
+            catch
+            {
+                Status.Value = PainSaberPluginStatus.DeviceConnectionFailed;
+                return;
+            }
+
+            // todo devicestate etc
+
+        }
+
+        public static void NoteMissed()
+        {
+            var duration = Config.NoteMissed.DurationMs;
             var endTime = DateTime.UtcNow + TimeSpan.FromMilliseconds(duration);
 
-            foreach (var name in PainSaberConfig.Instance.NoteMissed.Shockers)
+            foreach (var name in Config.NoteMissed.Shockers)
             {
                 RealTimeApi.AddShockTransmission(new ConstantShockTransmission(
                     getShockerIdByName(name),
                     endTime,
-                    (byte)PainSaberConfig.Instance.NoteMissed.Intensity
+                    (byte)Config.NoteMissed.Intensity
                 ));
             }
         }
 
         public static void NoteIncorrect()
         {
-            var duration = PainSaberConfig.Instance.NoteFailed.DurationMs;
+            var duration = Config.NoteFailed.DurationMs;
             var endTime = DateTime.UtcNow + TimeSpan.FromMilliseconds(duration);
 
-            foreach (var name in PainSaberConfig.Instance.NoteFailed.Shockers)
+            foreach (var name in Config.NoteFailed.Shockers)
             {
                 RealTimeApi.AddShockTransmission(new ConstantShockTransmission(
                     getShockerIdByName(name),
                     endTime,
-                    (byte)PainSaberConfig.Instance.NoteFailed.Intensity
+                    (byte)Config.NoteFailed.Intensity
                 ));
             }
         }
 
         public static void HeadInWall(long durationMs)
         {
-            int intensity = PainSaberConfig.Instance.HeadInWall.StartIntensity;
-            int incrementBy = PainSaberConfig.Instance.HeadInWall.IncrementBy;
-            int incrementEvery = PainSaberConfig.Instance.HeadInWall.IncrementEveryMs;
+            int intensity = Config.HeadInWall.StartIntensity;
+            int incrementBy = Config.HeadInWall.IncrementBy;
+            int incrementEvery = Config.HeadInWall.IncrementEveryMs;
 
             intensity += (int)(durationMs / incrementEvery) * incrementBy;
 
             var endTime = DateTime.UtcNow + TimeSpan.FromMilliseconds(100 + incrementEvery);
 
-            foreach (var name in PainSaberConfig.Instance.HeadInWall.Shockers)
+            foreach (var name in Config.HeadInWall.Shockers)
             {
                 RealTimeApi.AddShockTransmission(new ConstantShockTransmission(
                     getShockerIdByName(name),
@@ -75,46 +148,35 @@ namespace PainSaber
             }
         }
 
-        public static void BombCut() 
+        public static void BombCut()
         {
-            var duration = PainSaberConfig.Instance.BombCut.DurationMs;
+            var duration = Config.BombCut.DurationMs;
             var endTime = DateTime.UtcNow + TimeSpan.FromMilliseconds(duration);
 
-            foreach (var name in PainSaberConfig.Instance.BombCut.Shockers)
+            foreach (var name in Config.BombCut.Shockers)
             {
                 RealTimeApi.AddShockTransmission(new ConstantShockTransmission(
                     getShockerIdByName(name),
                     endTime,
-                    (byte)PainSaberConfig.Instance.BombCut.Intensity
+                    (byte)Config.BombCut.Intensity
                 ));
             }
         }
 
+
+
         [Init]
-        public PainSaberPlugin(Logger logger, Config conf)
+        public PainSaberPlugin(Logger logger, IPA.Config.Config conf)
         {
             Log = logger;
-            PainSaberConfig.Instance = conf.Generated<PainSaberConfig>();
-
-            API = new OpenShockApi(PainSaberConfig.Instance.OpenShockApiKey);
-            RealTimeApi = new RealTimeApi(PainSaberConfig.Instance.OpenShockApiKey);
+            Config = conf.Generated<PainSaberConfig>();
 
             EventRegistrationBehaviour.OnLoad();
 
-            
+            retryTimer.Elapsed += (a,b) => retryConnection();
+            retryTimer.Start();
 
-            AsyncUtils.RunWithCallback(API.GetOwnShockers(), devices => {
-                var device = devices.First();
-
-                Shocker.AddRange(device.shockers); // todo multiple devices
-
-                Log.Debug("Received Infos about shockers");
-
-                AsyncUtils.RunWithCallback(API.GetLiveControlGatewayInfo(device.id), info => {
-                    AsyncUtils.FireAndForget(RealTimeApi.Connect(device.id, info.Gateway));
-                    Log.Debug("Got Gateway info");
-                });
-            });          
+            BSMLSettings.instance.AddSettingsMenu("Painsaber", "PainSaber.UI.Settings.bsml", new UI.SettingsViewController());
         }
 
         [OnStart]
@@ -130,10 +192,10 @@ namespace PainSaber
         }
 
 
-        private static string getShockerIdByName(string name) 
+        private static string getShockerIdByName(string name)
         {
             // todo make faster
-            return Shocker.Find(s => s.name.Equals(name, StringComparison.InvariantCultureIgnoreCase)).id;
+            return Shockers.FirstOrDefault(s => s.name.Equals(name, StringComparison.InvariantCultureIgnoreCase))?.id;
         }
 
     }

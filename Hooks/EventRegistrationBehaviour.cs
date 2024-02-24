@@ -16,13 +16,13 @@ namespace PainSaber.Hooks
             go.AddComponent<EventRegistrationBehaviour>();
         }
 
-        private void Awake() 
+        private void Awake()
         {
             if (Instance != null) return;
             Instance = this;
 
             SceneManager.activeSceneChanged += SceneManagerOnActiveSceneChanged;
-            PainSaberPlugin.Log.Debug("Attached scene change hook.");   
+            PainSaberPlugin.Log.Debug("Attached scene change hook.");
         }
 
         private void SceneManagerOnActiveSceneChanged(Scene _, Scene scene)
@@ -45,7 +45,7 @@ namespace PainSaber.Hooks
             var gameScenesManager = Resources.FindObjectsOfTypeAll<GameScenesManager>().FirstOrDefault();
             if (gameScenesManager == null)
                 gameScenesManager.transitionDidFinishEvent -= GameSceneLoadedCallback;
-    
+
             GameSceneSceneWasLoaded(transitionSetupData, diContainer);
         }
 
@@ -78,11 +78,10 @@ namespace PainSaber.Hooks
             }
         }
 
-        private void OnNoteMissed(NoteController noteController) 
+        private void OnNoteMissed(NoteController noteController)
         {
             if (noteController is BombNoteController) return;
-            
-            PainSaberPlugin.Log.Debug("Note was missed.");
+
             PainSaberPlugin.NoteMissed();
         }
     }

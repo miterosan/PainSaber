@@ -1,0 +1,69 @@
+<vertical child-control-height='false'>
+    <horizontal bg='panel-top' pad-left='10' pad-right='10' horizontal-fit='PreferredSize'>
+        <text text='PainSaber' align='Center' font-size='10'/>
+    </horizontal>
+    <horizontal bg='round-rect-panel' pad='8'>
+        <text text='Status: '/>
+        <text id='status-text' text='loading...'/>
+    </horizontal>
+    <vertical bg='round-rect-panel' pad='8'>
+        <text text='Note missed'/>
+        <slider-setting id='note-missed-intensity'
+                        text="Intensity: "
+                        min='0' max='100' increment='1'
+                        bind-value='true' apply-on-change='true'/>
+        <slider-setting id='note-missed-duration'
+                        text="Duration: "
+                        min='0' max='2000' increment='100'
+                        bind-value='true' apply-on-change='true'/>
+        <macro.for-each items='note-missed-shockers'>
+            <checkbox text='~Name' value='Value' bind-value='true' apply-on-change='true'/>
+        </macro.for-each>
+    </vertical>
+    <vertical bg='round-rect-panel' pad='8'>
+        <text text='Note failed'/>
+        <slider-setting id='note-missed-intensity'
+                        text="Intensity: "
+                        min='0' max='100' increment='1'
+                        bind-value='true' apply-on-change='true'/>
+        <slider-setting id='note-missed-duration'
+                        text="Duration: "
+                        min='0' max='2000' increment='100'
+                        bind-value='true' apply-on-change='true'/>
+        <macro.for-each items='note-failed-shockers'>
+            <checkbox text='~Name' value='Value' bind-value='true' apply-on-change='true'/>
+        </macro.for-each>
+    </vertical>
+    <vertical bg='round-rect-panel' pad='8'>
+        <text text='Bomb hit'/>
+        <slider-setting id='bomb-hit-intensity'
+                        text="Intensity: "
+                        min='0' max='100' increment='1'
+                        bind-value='true' apply-on-change='true'/>
+        <slider-setting id='bomb-hit-duration'
+                        text="Duration: "
+                        min='0' max='2000' increment='100'
+                        bind-value='true' apply-on-change='true'/>
+        <macro.for-each items='bomb-hit-shockers'>
+            <checkbox text='~Name' value='Value' bind-value='true' apply-on-change='true'/>
+        </macro.for-each>
+    </vertical>
+    <vertical bg='round-rect-panel' pad='8'>
+        <text text='Head in wall'/>
+        <slider-setting id='head-in-wall-start-intensity'
+                        text="Start intensity: "
+                        min='0' max='100' increment='1'
+                        bind-value='true' apply-on-change='true'/>
+        <slider-setting id='head-in-wall-increase-by'
+                        text="Increase by: "
+                        min='0' max='50' increment='1'
+                        bind-value='true' apply-on-change='true'/>
+        <slider-setting id='head-in-wall-increase-every'
+                        text="Increase every (ms): "
+                        min='0' max='500' increment='100'
+                        bind-value='true' apply-on-change='true'/>
+        <macro.for-each items='head-in-wall-shockers'>
+            <checkbox text='~Name' value='Value' bind-value='true' apply-on-change='true'/>
+        </macro.for-each>
+    </vertical>
+</vertical>

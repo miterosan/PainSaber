@@ -23,12 +23,12 @@ namespace PainSaber.OpenShock
         public LiveDeviceState DeviceState { get; set; }
 
         private readonly Collection<IShockTransmission> transmissions = new Collection<IShockTransmission>();
-        
+
         public IReadOnlyCollection<IShockTransmission> Transmissions => transmissions;
         private readonly ConcurrentQueue<IShockTransmission> newTransmissions = new ConcurrentQueue<IShockTransmission>();
 
 
-        public void AddShockTransmission(IShockTransmission shockTransmission) 
+        public void AddShockTransmission(IShockTransmission shockTransmission)
         {
             PainSaberPlugin.Log.Debug("Added transmission");
             newTransmissions.Enqueue(shockTransmission);
@@ -57,9 +57,9 @@ namespace PainSaber.OpenShock
             sendThread.Start();
         }
 
-        private async void HandleResponses() 
+        private async void HandleResponses()
         {
-            while(websocket.State != WebSocketState.Closed) 
+            while(websocket.State != WebSocketState.Closed)
             {
                 var response = await ReceiveNext();
 
@@ -78,7 +78,7 @@ namespace PainSaber.OpenShock
             }
         }
 
-        private async void handleTransmissions() 
+        private async void handleTransmissions()
         {
             while(websocket.State != WebSocketState.Closed)
             {
@@ -96,18 +96,18 @@ namespace PainSaber.OpenShock
                     if (newTransmissions.TryDequeue(out IShockTransmission transmission))
                         transmissions.Add(transmission);
                 }
-               
+
                 // determine level of each shocker by taking the highest value
                 foreach (var group in transmissions.GroupBy(t => t.ShockerId))
                 {
                     byte intensity = group.Max(t => t.GetIntensity());
-                    
+
                     await SendFrame(group.Key, intensity, LiveControlType.Shock);
                 }
             }
         }
 
-        private async Task SendFrame(string shockerId, byte intensity, LiveControlType type) 
+        private async Task SendFrame(string shockerId, byte intensity, LiveControlType type)
         {
             PainSaberPlugin.Log.Debug($"Sending Frame: {shockerId}, {intensity}, {type}");
 
@@ -123,14 +123,14 @@ namespace PainSaber.OpenShock
 
         private readonly ArraySegment<byte> receiveBuffer;
 
-        private async Task<BaseLiveResponse<LiveResponseType>> ReceiveNext() 
+        private async Task<BaseLiveResponse<LiveResponseType>> ReceiveNext()
         {
             BaseLiveResponse<LiveResponseType> response = null;
 
-            while(response == null) 
+            while(response == null)
             {
                 var receiveResult = await websocket.ReceiveAsync(receiveBuffer, CancellationToken.None);
-                
+
                 string message = Encoding.UTF8.GetString(receiveBuffer.Array, 0, receiveResult.Count);
 
                 if (message.Trim() == string.Empty) continue;
@@ -141,7 +141,7 @@ namespace PainSaber.OpenShock
             return response;
         }
 
-        private async Task SendPong() 
+        private async Task SendPong()
         {
             await Send(new BaseLiveRequest<LiveRequestType>{
                 RequestType = LiveRequestType.Pong,
@@ -151,7 +151,7 @@ namespace PainSaber.OpenShock
             });
         }
 
-        private async Task Send<T>(BaseLiveRequest<T> request) 
+        private async Task Send<T>(BaseLiveRequest<T> request)
             where T : Enum
         {
             var message = JsonConvert.SerializeObject(request);

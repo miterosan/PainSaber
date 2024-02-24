@@ -6,8 +6,6 @@ namespace PainSaber
 {
     public class PainSaberConfig
     {
-        public static PainSaberConfig Instance { get; set; }
-
         public virtual string OpenShockApiKey { get; set; } = "Your APIKEY here";
         public virtual string Device { get; set; } = "The id of the control box";
 
@@ -21,7 +19,7 @@ namespace PainSaber
         public virtual WallShocksConfig HeadInWall { get; set; } = new WallShocksConfig();
 
 
-        public class ShocksConfig 
+        public class ShocksConfig
         {
             [UseConverter(typeof(ListConverter<string>))]
             public virtual List<string> Shockers { get; set; } = new List<string>();

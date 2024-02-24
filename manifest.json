@@ -9,6 +9,7 @@
     "version": "0.1.0",
     "links": {},
     "dependsOn": {
-      "BSIPA": "^4.3.2"
+      "BSIPA": "^4.2.2",
+      "BeatSaberMarkupLanguage": "^1.6.10"
     }
 }

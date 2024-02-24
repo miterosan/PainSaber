@@ -22,12 +22,12 @@ namespace PainSaber.OpenShock
             client.DefaultRequestHeaders.Add("OpenShockToken", apiKey);
         }
 
-        public async Task ControlShockers(ControlRequest controlRequest) 
+        public async Task ControlShockers(ControlRequest controlRequest)
         {
             var requestData = JsonConvert.SerializeObject(new
             {
                 shocks = new[] {
-                    new { 
+                    new {
                         controlRequest.Shocker.id,
                         type = (int)controlRequest.Type,
                         intensity = controlRequest.Amount,
@@ -37,7 +37,7 @@ namespace PainSaber.OpenShock
                 customName = controlRequest.Name
             });
 
-            using(var jsonContent = new StringContent(requestData, Encoding.UTF8, "application/json")) 
+            using(var jsonContent = new StringContent(requestData, Encoding.UTF8, "application/json"))
             {
                 await client.PostAsync("/2/shockers/control", jsonContent);
             }
@@ -65,5 +65,6 @@ namespace PainSaber.OpenShock
 
             return devices.data;
         }
+
     }
 }
